@@ -4,39 +4,47 @@ ShadowPI is a Telegram moderation bot built on `python-telegram-bot` that combin
 the CAS (Combot Anti-Spam) API with lightweight behaviour scoring so you can react
 instantly to risky joins, floods, or suspicious link drops across your chats.
 
-## Highlights
+## Quick start
 
-- **Per-user CAS checks**: Every new member is verified against `https://api.cas.chat/check`.
-  Confirmed CAS bans trigger an immediate ban plus a mod-log entry.
-- **Bulk CAS export sweeps**: A background job keeps the `export.csv` list mirrored in a
-  local SQLite watchlist so later messages from those IDs skip straight to high-risk
-  handling even if they joined before the last sync.
-- **Profile + scoring**: Per-user metadata (first/last seen, counters, local trust) is
-  tracked in `../shadowpi_data/shadowpi.sqlite3` and evaluated on every message for floods,
-  repeated copy/paste, premature link drops, forwards-only behaviour, and blacklist hits.
-- **Tiered responses**: Thresholds escalate from warn → mute → ban. Actions are logged to
-  an optional moderator channel.
-- **Manual overrides**: `/allow`, `/banlocal`, and `/override_clear` let admins rescue
-  false positives or permanently nuke chronic offenders regardless of CAS status.
+With the bot running and added to your Telegram group with the moderation
+permissions it needs:
 
-## Setup
+1. Send `/start` to see the available controls.
+2. As a group admin, send `/activate` and answer the bot's private message
+   with your configured activation PIN. The bot stays locked until activation.
+3. Use `/stats` to see its activity. Use `/standdown` to pause automatic
+   enforcement, `/patrol` to resume, or `/lock` to lock the bot again.
 
-```
+For your first member review, `/sweep report` produces a report. The separate
+`clean` mode takes moderation actions; review the command reference before using it.
+To host the bot, follow [installation](#installation).
+
+## Installation
+
+You need Python 3.10+, a Telegram bot token, and the runtime packages below.
+The repository does not include a `requirements.txt` for ShadowPI.
+
+Clone into a lowercase `shadowpi` package folder and run it from the parent folder:
+
+```bash
+git clone https://github.com/RawLabs/ShadowPI.git shadowpi
 python -m venv bots-env
 source bots-env/bin/activate
-pip install -r requirements.txt
+python -m pip install "python-telegram-bot[rate-limiter,job-queue]" httpx
+export SHADOWPI_BOT_TOKEN="your-bot-token-here"
+python -m shadowpi.bot
+```
 
-export TELEGRAM_BOT_TOKEN="1234567890:ABC..."
-# Optional tuning:
+The package uses relative imports, so use `python -m shadowpi.bot` rather than
+running `bot.py` directly. The token can also be supplied through the legacy
+`TELEGRAM_BOT_TOKEN` variable.
+
+Optional configuration, set before starting the process:
+
+```bash
 export SHADOWPI_DATA_DIR="/var/lib/shadowpi"
 export SHADOWPI_MOD_LOG_CHAT="-1001234567890"
 export SHADOWPI_KEYWORDS="pump,moon,xxx"
-```
-
-Then run the bot:
-
-```
-python bot.py
 ```
 
 ## Commands
@@ -107,6 +115,21 @@ separated entries such as `123456789 @handle First Last`. Each line **must** con
 the numeric Telegram user ID; optional usernames and names improve the risk report.
 Imported entries populate the SQLite DB so `/sweep` can rate long-time members
 immediately, even if they haven't spoken since ShadowPI was deployed.
+
+## Highlights
+
+- **Per-user CAS checks**: Every new member is verified against `https://api.cas.chat/check`.
+  Confirmed CAS bans trigger an immediate ban plus a mod-log entry.
+- **Bulk CAS export sweeps**: A background job keeps the `export.csv` list mirrored in a
+  local SQLite watchlist so later messages from those IDs skip straight to high-risk
+  handling even if they joined before the last sync.
+- **Profile + scoring**: Per-user metadata (first/last seen, counters, local trust) is
+  tracked in `../shadowpi_data/shadowpi.sqlite3` and evaluated on every message for floods,
+  repeated copy/paste, premature link drops, forwards-only behaviour, and blacklist hits.
+- **Tiered responses**: Thresholds escalate from warn → mute → ban. Actions are logged to
+  an optional moderator channel.
+- **Manual overrides**: `/allow`, `/banlocal`, and `/override_clear` let admins rescue
+  false positives or permanently nuke chronic offenders regardless of CAS status.
 
 ## Behaviour rules
 
