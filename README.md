@@ -1,5 +1,7 @@
 # ShadowPI – CAS-aware proactive moderator
 
+<img src="docs/images/shadowpi.webp" alt="ShadowPI logo with a detective silhouette on a shield" width="200">
+
 ShadowPI is a Telegram moderation bot built on `python-telegram-bot` that combines
 the CAS (Combot Anti-Spam) API with lightweight behaviour scoring so you can react
 instantly to risky joins, floods, or suspicious link drops across your chats.
